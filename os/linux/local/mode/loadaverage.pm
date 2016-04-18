@@ -47,6 +47,7 @@ sub new {
                                   "warning:s"         => { name => 'warning', default => '' },
                                   "critical:s"        => { name => 'critical', default => '' },
                                   "average"           => { name => 'average' },
+                                  "log10"             => { name => 'logarithm' },
                                 });
     return $self;
 }
@@ -106,7 +107,44 @@ sub run {
         $self->{output}->option_exit();
     }
 
-    if (defined($self->{option_results}->{average})) {    
+    if (defined($self->{option_results}->{logarithm})) {
+        my $countCpu = 0;
+
+        $countCpu++ while ($stdout =~ /^cpu\d+/msg);
+
+        if ($countCpu == 0){
+            $self->{output}->output_add(severity => 'unknown',
+                                        short_msg => 'Unable to get number of CPUs');
+            $self->{output}->display();
+            $self->{output}->exit();
+        }
+
+        $cpu_load1  ||= 0.01;
+        $cpu_load5  ||= 0.01;
+        $cpu_load15 ||= 0.01;
+        $cpu_load1  = 10*log($load1m  / $countCpu)/log(10);
+        $cpu_load5  = 10*log($load5m  / $countCpu)/log(10);
+        $cpu_load15 = 10*log($load15m / $countCpu)/log(10);
+        my $crit01  = 10*log($countCpu**3)/log(10);
+        my $crit05  = 10*log($countCpu**2)/log(10);
+        my $crit15  = 10*log($countCpu**1)/log(10);
+        $msg = sprintf("Load average: %0.1fdB, %0.1fdB, %0.1fdB", $cpu_load1, $cpu_load5, $cpu_load15);
+        $self->{output}->perfdata_add(label => 'load1dB',
+                                  value => $cpu_load1,
+                                  warning => 0,
+                                  critical => $crit01,
+                                  min => -20);
+        $self->{output}->perfdata_add(label => 'load5dB',
+                                  value => $cpu_load5,
+                                  warning => 0,
+                                  critical => $crit05,
+                                  min => 0);
+        $self->{output}->perfdata_add(label => 'load15dB',
+                                  value => $cpu_load15,
+                                  warning => 0,
+                                  critical => $crit15,
+                                  min => 0);
+    } elsif (defined($self->{option_results}->{average})) {
         my $countCpu = 0;
         
         $countCpu++ while ($stdout =~ /^cpu\d+/msg);
@@ -212,6 +250,13 @@ Threshold critical (1min,5min,15min).
 =item B<--average>
 
 Load average for the number of CPUs.
+
+=item B<--log10>
+
+Calculate logarithm of load average. This is a handy value, from -20dB (meaning
+avg load of 0.01) to 0 (which all cpus queue are full). 0 is always the warning
+threshold. The critical thresholds are calculated by the count of cpus. The
+options I<--warning> and I<--critical> are meaningless in this case.
 
 =item B<--remote>
 
