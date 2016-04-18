@@ -138,12 +138,12 @@ sub run {
                                   value => $cpu_load5,
                                   warning => 0,
                                   critical => $crit05,
-                                  min => 0);
+                                  min => -20);
         $self->{output}->perfdata_add(label => 'load15dB',
                                   value => $cpu_load15,
                                   warning => 0,
                                   critical => $crit15,
-                                  min => 0);
+                                  min => -20);
     } elsif (defined($self->{option_results}->{average})) {
         my $countCpu = 0;
         
