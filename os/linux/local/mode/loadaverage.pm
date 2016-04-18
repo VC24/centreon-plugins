@@ -119,9 +119,9 @@ sub run {
             $self->{output}->exit();
         }
 
-        $cpu_load1  ||= 0.01;
-        $cpu_load5  ||= 0.01;
-        $cpu_load15 ||= 0.01;
+        $load1m   ||= 0.01;
+        $load5m   ||= 0.01;
+        $load15m  ||= 0.01;
         $cpu_load1  = 10*log($load1m  / $countCpu)/log(10);
         $cpu_load5  = 10*log($load5m  / $countCpu)/log(10);
         $cpu_load15 = 10*log($load15m / $countCpu)/log(10);
