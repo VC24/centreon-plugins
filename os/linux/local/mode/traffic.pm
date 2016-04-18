@@ -249,12 +249,12 @@ sub run {
 
         my $extra_label = '';
         $extra_label = '_' . $name if (!defined($self->{option_results}->{name}) || defined($self->{option_results}->{use_regexp}));
-        $self->{output}->perfdata_add(label => 'traffic_in' . $extra_label, unit => 'b/s',
+        $self->{output}->perfdata_add(label => 'traffic_in' . $extra_label, unit => 'b',
                                       value => sprintf("%.2f", $in_absolute_per_sec),
                                       warning => $self->{perfdata}->get_perfdata_for_output(label => 'warning-in', total => $interface_speed),
                                       critical => $self->{perfdata}->get_perfdata_for_output(label => 'critical-in', total => $interface_speed),
                                       min => 0, max => $interface_speed);
-        $self->{output}->perfdata_add(label => 'traffic_out' . $extra_label, unit => 'b/s',
+        $self->{output}->perfdata_add(label => 'traffic_out' . $extra_label, unit => 'b',
                                       value => sprintf("%.2f", $out_absolute_per_sec),
                                       warning => $self->{perfdata}->get_perfdata_for_output(label => 'warning-out', total => $interface_speed),
                                       critical => $self->{perfdata}->get_perfdata_for_output(label => 'critical-out', total => $interface_speed),
