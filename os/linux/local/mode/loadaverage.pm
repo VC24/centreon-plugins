@@ -26,6 +26,15 @@ use strict;
 use warnings;
 use centreon::plugins::misc;
 
+my $log10f = log(10);
+sub log10 {
+    my ($x, $y) = @_;
+    $y //= 1;
+    return unless $x;
+    return if $x eq 0 or $y eq 0;
+    return log($x / $y) / $log10f;
+}
+
 sub new {
     my ($class, %options) = @_;
     my $self = $class->SUPER::new(package => __PACKAGE__, %options);
@@ -119,31 +128,30 @@ sub run {
             $self->{output}->exit();
         }
 
-        $load1m   ||= 0.01;
-        $load5m   ||= 0.01;
-        $load15m  ||= 0.01;
-        $cpu_load1  = 10*log($load1m  / $countCpu)/log(10);
-        $cpu_load5  = 10*log($load5m  / $countCpu)/log(10);
-        $cpu_load15 = 10*log($load15m / $countCpu)/log(10);
-        my $crit01  = 10*log($countCpu**3)/log(10);
-        my $crit05  = 10*log($countCpu**2)/log(10);
-        my $crit15  = 10*log($countCpu**1)/log(10);
+        my $low = 10 * log10(0.01, $countCpu);
+
+        $cpu_load1  = ($load1m  != 0) ? (10 * log10($load1m , $countCpu)) : $low;
+        $cpu_load5  = ($load5m  != 0) ? (10 * log10($load5m , $countCpu)) : $low;
+        $cpu_load15 = ($load15m != 0) ? (10 * log10($load15m, $countCpu)) : $low;
+        my $crit01  = 10 * log10($countCpu ** 3);
+        my $crit05  = 10 * log10($countCpu ** 2);
+        my $crit15  = 10 * log10($countCpu ** 1);
         $msg = sprintf("Load average: %0.1fdB, %0.1fdB, %0.1fdB", $cpu_load1, $cpu_load5, $cpu_load15);
         $self->{output}->perfdata_add(label => 'load1dB',
                                   value => $cpu_load1,
                                   warning => 0,
                                   critical => $crit01,
-                                  min => -20);
+                                  min => $low);
         $self->{output}->perfdata_add(label => 'load5dB',
                                   value => $cpu_load5,
                                   warning => 0,
                                   critical => $crit05,
-                                  min => -20);
+                                  min => $low);
         $self->{output}->perfdata_add(label => 'load15dB',
                                   value => $cpu_load15,
                                   warning => 0,
                                   critical => $crit15,
-                                  min => -20);
+                                  min => $low);
     } elsif (defined($self->{option_results}->{average})) {
         my $countCpu = 0;
         
