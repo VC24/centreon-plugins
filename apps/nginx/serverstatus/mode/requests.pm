@@ -29,7 +29,7 @@ use centreon::plugins::statefile;
 
 my $maps = [
     { counter => 'accepts', output => 'Connections accepted per seconds %.2f', match => 'server accepts handled requests.*?(\d+)' },
-    { counter => 'handled', output => 'Connections handled per serconds %.2f', match => 'server accepts handled requests.*?\d+\s+(\d+)' }, 
+    { counter => 'handled', output => 'Connections handled per seconds %.2f', match => 'server accepts handled requests.*?\d+\s+(\d+)' },
     { counter => 'requests', output => 'Requests per seconds %.2f', match => 'server accepts handled requests.*?\d+\s+\d+\s+(\d+)' },
 ];
 
